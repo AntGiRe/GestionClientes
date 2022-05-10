@@ -1,15 +1,20 @@
 
 import java.util.Scanner;
+import base_datos.DBManager;
 
 /**
  *
- * @author lionel
+ * @author Antonio J. Gil
+ * created on 10/05
  */
 public class GestionClientes {
 
+	/**
+	 * Main
+	 * @param args Argumentos
+	 */
     public static void main(String[] args) {
 
-        DBManager.loadDriver();
         DBManager.connect();
 
         boolean salir = false;
@@ -21,6 +26,10 @@ public class GestionClientes {
 
     }
 
+    /**
+     * Imprime menú y solicita elegir opción
+     * @return devuelve false cuando el usuario sale del menú principal
+     */
     public static boolean menuPrincipal() {
         System.out.println("");
         System.out.println("MENU PRINCIPAL");
@@ -30,7 +39,6 @@ public class GestionClientes {
         System.out.println("4. Eliminar cliente");
         System.out.println("5. Salir");
         
-        Scanner in = new Scanner(System.in);
             
         int opcion = pideInt("Elige una opción: ");
         
@@ -56,27 +64,36 @@ public class GestionClientes {
         
     }
     
+    /**
+     * Solicita un entero
+     * @param mensaje Cadena de texto que pide un valor determinado al usuario
+     * @return devuelve un entero
+     */
     public static int pideInt(String mensaje){
-        
+    	Scanner in = new Scanner(System.in);
+    	
         while(true) {
             try {
                 System.out.print(mensaje);
-                Scanner in = new Scanner(System.in);
                 int valor = in.nextInt();
-                //in.nextLine();
                 return valor;
             } catch (Exception e) {
                 System.out.println("No has introducido un número entero. Vuelve a intentarlo.");
             }
         }
+        
     }
     
+    /**
+     * Solicita una cadena de texto
+     * @param mensaje Cadena de texto que pide un valor determinado al usuario
+     * @return devuelve una cadena de texto
+     */
     public static String pideLinea(String mensaje){
-        
+    	Scanner in = new Scanner(System.in);
         while(true) {
             try {
                 System.out.print(mensaje);
-                Scanner in = new Scanner(System.in);
                 String linea = in.nextLine();
                 return linea;
             } catch (Exception e) {
@@ -85,13 +102,18 @@ public class GestionClientes {
         }
     }
 
+    /**
+     * Imprime listado de clientes
+     */
     public static void opcionMostrarClientes() {
         System.out.println("Listado de Clientes:");
         DBManager.printTablaClientes();
     }
-
+    
+    /**
+     * Introducir nuevo cliente a la BBDD
+     */
     public static void opcionNuevoCliente() {
-        Scanner in = new Scanner(System.in);
 
         System.out.println("Introduce los datos del nuevo cliente:");
         String nombre = pideLinea("Nombre: ");
@@ -106,8 +128,10 @@ public class GestionClientes {
         }
     }
 
+    /**
+     * Modifica los datos de un cliente de una BBDD
+     */
     public static void opcionModificarCliente() {
-        Scanner in = new Scanner(System.in);
 
         int id = pideInt("Indica el id del cliente a modificar: ");
 
@@ -134,8 +158,10 @@ public class GestionClientes {
         }
     }
 
+    /**
+     * Eliminar un cliente de la BBDD
+     */
     public static void opcionEliminarCliente() {
-        Scanner in = new Scanner(System.in);
 
         int id = pideInt("Indica el id del cliente a eliminar: ");
 
