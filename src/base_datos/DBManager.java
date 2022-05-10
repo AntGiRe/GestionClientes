@@ -2,6 +2,9 @@ package base_datos;
 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -9,7 +12,8 @@ import java.sql.ResultSet;
 /**
  *
  * @author Antonio J. Gil
- * created on 10/05
+ * created on 10/0
+ * @version 2.0
  */
 public class DBManager {
 
@@ -121,12 +125,50 @@ public class DBManager {
     public static ResultSet getTablaClientes() {
         return getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     }
+    
+    /**
+     * Imprime en un fichero lista de clientes.
+     * @param ruta cadena de texto con la ruta del fichero a generar
+     * @return devuelve true si se recogieron los clientes en un fichero satisfactoriamente
+     */
+    public static boolean printClientesFichero(String ruta) {
+    	
+    	try {
+    		File fichero = new File(ruta);
+    		fichero.createNewFile();
+    		ResultSet rs = getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
+			FileWriter writer = new FileWriter(fichero);
+    	
+			writer.write("DB Name: " + DB_NAME + "   -   Table Name: " + DB_CLI + "\n");
+			writer.write(DB_CLI_ID + "\t" + DB_CLI_NOM + "\t" + DB_CLI_DIR + "\n");
+    	
+			while (rs.next()) {
+                int id = rs.getInt(DB_CLI_ID);
+                String n = rs.getString(DB_CLI_NOM);
+                String d = rs.getString(DB_CLI_DIR);
+                writer.write(id + "\t" + n + "\t" + d + "\n");
+            }
+			
+			writer.close();
+			
+			return true;
+		} catch (IOException e) {
+			System.out.println("[" + e + "] - No se puedo crear el fichero");
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}   
+            	   	
+    }
 
     /**
      * Imprime por pantalla el contenido de la tabla clientes
      */
     public static void printTablaClientes() {
         try {
+        	
             ResultSet rs = getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             while (rs.next()) {
                 int id = rs.getInt(DB_CLI_ID);
@@ -143,7 +185,6 @@ public class DBManager {
     //////////////////////////////////////////////////
     // MÉTODOS DE UN SOLO CLIENTE
     //////////////////////////////////////////////////
-    ;
     
     /**
      * Solicita a la BD el cliente con id indicado
@@ -266,8 +307,8 @@ public class DBManager {
      * Solicita a la BD modificar los datos de un cliente
      *
      * @param id id del cliente a modificar
-     * @param nombre nuevo nombre del cliente
-     * @param direccion nueva dirección del cliente
+     * @param nuevoNombre nuevo nombre del cliente
+     * @param nuevaDireccion nueva dirección del cliente
      * @return verdadero si pudo modificarlo, false en caso contrario
      */
     public static boolean updateCliente(int id, String nuevoNombre, String nuevaDireccion) {
@@ -335,5 +376,5 @@ public class DBManager {
             return false;
         }
     }
-
+    
 }

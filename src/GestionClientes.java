@@ -6,6 +6,7 @@ import base_datos.DBManager;
  *
  * @author Antonio J. Gil
  * created on 10/05
+ * @version 2.0
  */
 public class GestionClientes {
 
@@ -37,7 +38,8 @@ public class GestionClientes {
         System.out.println("2. Nuevo cliente");
         System.out.println("3. Modificar cliente");
         System.out.println("4. Eliminar cliente");
-        System.out.println("5. Salir");
+        System.out.println("5. Imprimir tabla en un fichero");
+        System.out.println("6. Salir");
         
             
         int opcion = pideInt("Elige una opción: ");
@@ -56,6 +58,9 @@ public class GestionClientes {
                 opcionEliminarCliente();
                 return false;
             case 5:
+            	opcionImprimirFichero();
+            	return false;
+            case 6:
                 return true;
             default:
                 System.out.println("Opción elegida incorrecta");
@@ -178,6 +183,23 @@ public class GestionClientes {
             System.out.println("Cliente eliminado correctamente");
         } else {
             System.out.println("Error :(");
+        }
+    }
+    
+    /**
+     * Solicita ruta donde generar fichero con clientes
+     */
+    public static void opcionImprimirFichero() {
+
+        String ruta = pideLinea("Indica la ruta o nombre (si quiere que se genere en la carpeta de proyecto) del fichero: ");
+
+        // Comprobamos si existe el cliente
+        if (DBManager.printClientesFichero(ruta)) {
+            System.out.println("El fichero se ha generado correctamente");
+            return;
+        } else {
+        	System.out.println("El fichero no se ha podido generar, revise lo introducido.");
+        	return;
         }
     }
 }
