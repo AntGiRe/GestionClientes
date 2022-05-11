@@ -148,7 +148,7 @@ public class DBManager {
      * @param resultSetConcurrency Concurrencia del ResultSet
      * @return ResultSet (del tipo indicado) con la tabla, null en caso de error
      */
-    public static ResultSet getTablaClientes(int resultSetType, int resultSetConcurrency) {
+    private static ResultSet getTablaClientes(int resultSetType, int resultSetConcurrency) {
         try {
             PreparedStatement stmt = conn.prepareStatement(DB_CLI_SELECT, resultSetType, resultSetConcurrency);
             ResultSet rs = stmt.executeQuery();
@@ -158,15 +158,6 @@ public class DBManager {
             return null;
         }
 
-    }
-
-    /**
-     * Obtiene toda la tabla clientes de la base de datos
-     *
-     * @return ResultSet (por defecto) con la tabla, null en caso de error
-     */
-    public static ResultSet getTablaClientes() {
-        return getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     }
 
     /**
