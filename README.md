@@ -2,6 +2,7 @@
 Ejercicio Práctico Combinado Final BBDD - EEDD 1 DAW
 
 Mejoras de la v3
+
 ✔️ La aplicación permite volcar en un fichero, que el usuario elija, la tabla de la base de datos.
 
 ✔️ Se ha modificado método MenuPrincipal() en GestionClientes.
@@ -13,6 +14,7 @@ Mejoras de la v3
 ✔️ Se han documentado paquete y métodos.
 
 Mejoras de la v2
+
 ✔️ Creado  e  incorporado un Paquete Java para la clase DBManager.
 
 ✔️ Se han documentado paquete y métodos.
