@@ -1,6 +1,18 @@
 # GestionClientes
 Ejercicio Práctico Combinado Final BBDD - EEDD 1 DAW
 
+Mejoras de la v4
+
+✔️ Se ha añadido el método cambioBaseyTabla() en DBManager, para poder tener una base de datos y/o una tabla (que tenga 3 campos), que el usuario elija
+
+✔️ Se ha añadido el método pideBaseTabla() en GestionClientes.
+
+✔️ Excepciones surgidas del primer cambio controladas.
+
+✔️ Se ha añadido el método opcionImprimirNumeroPersonas() en GestionClientes.
+
+✔️ Se ha añadido el método getCountDireccion() en DBManager, devuelve numero de clientes de una zona
+
 Mejoras de la v3
 
 ✔️ La aplicación permite volcar en un fichero, que el usuario elija, la tabla de la base de datos.
