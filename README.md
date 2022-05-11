@@ -9,6 +9,8 @@ Mejoras de la v4
 
 ✔️ Excepciones surgidas del primer cambio controladas.
 
+✔️ Se ha añadido un procedimiento almacenado en tienda.sql, 'cuentaDireccion' que devuelve el numero de clientes de una zona
+
 ✔️ Se ha añadido el método opcionImprimirNumeroPersonas() en GestionClientes.
 
 ✔️ Se ha añadido el método getCountDireccion() en DBManager, devuelve numero de clientes de una zona
