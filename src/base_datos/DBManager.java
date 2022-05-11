@@ -5,34 +5,36 @@ import java.sql.PreparedStatement;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import java.sql.ResultSet;
 
 /**
  *
  * @author Antonio J. Gil
  * created on 10/0
- * @version 2.0
+ * @version 3.0
  */
 public class DBManager {
 
-    // Conexión a la base de datos
+	// Conexión a la base de datos
     private static Connection conn = null;
 
     // Configuración de la conexión a la base de datos
     private static final String DB_HOST = "localhost";
     private static final String DB_PORT = "3306";
-    private static final String DB_NAME = "tienda";
-    private static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
+    private static String DB_NAME = "tienda";
+    private static String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
     private static final String DB_MSQ_CONN_OK = "CONEXIÓN CORRECTA";
     private static final String DB_MSQ_CONN_NO = "ERROR EN LA CONEXIÓN";
 
     // Configuración de la tabla Clientes
-    private static final String DB_CLI = "clientes";
-    private static final String DB_CLI_SELECT = "SELECT * FROM " + DB_CLI;
+    private static String DB_CLI = "clientes";
+    private static String DB_CLI_SELECT = "SELECT * FROM " + DB_CLI;
     private static final String DB_CLI_ID = "id";
     private static final String DB_CLI_NOM = "nombre";
     private static final String DB_CLI_DIR = "direccion";
@@ -40,22 +42,39 @@ public class DBManager {
     //////////////////////////////////////////////////
     // MÉTODOS DE CONEXIÓN A LA BASE DE DATOS
     //////////////////////////////////////////////////
+    
+    /**
+     * Cambia la base de datos y/o la tabla a la que se accede
+     * @param base Nombre de la Base de datos
+     * @param tabla Tabla de la Base de datos
+     */
+    public static void cambioBaseyTabla(String base, String tabla) {
+    	
+    	if(base.length()!=0) {
+    		DB_NAME = base;
+    	} else {
+    		DB_NAME = "tienda";
+    	}
+    	
+    	if(tabla.length()!=0) {
+    		DB_CLI = tabla;
+    	} else {
+    		DB_CLI = "clientes";
+    	}
+    	
+    	DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
+    	DB_CLI_SELECT = "SELECT * FROM " + DB_CLI;
+    }
 
     /**
      * Intenta conectar con la base de datos.
-     *
      * @return true si pudo conectarse, false en caso contrario
+     * @throws SQLException Lanza excepción si base de datos no existe.
      */
-    public static boolean connect() {
-        try {
+    public static boolean connect() throws SQLException{
             System.out.print("Conectando a la base de datos...");
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-            System.out.println("OK!");
             return true;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            return false;
-        }
     }
 
     /**
@@ -95,7 +114,31 @@ public class DBManager {
     //////////////////////////////////////////////////
     // MÉTODOS DE TABLA CLIENTES
     //////////////////////////////////////////////////
-    ;
+    
+    /**
+     * Obtiene numero de clientes de una zona.
+     * @param direccion Cadena de caracteres de la zona que se solicita
+     * @return devuelve un entero con el numero de clientes de la zona
+     */
+    public static int getCountDireccion(String direccion) {
+    	int numero = 0;
+    	try {
+    		CallableStatement cStmt = conn.prepareCall("{call cuentaDireccion(?)}");
+    		cStmt.setString(1, direccion);
+    		
+    		cStmt.execute();    
+    	    ResultSet rs = cStmt.getResultSet();
+    	    
+    	    if(rs.next()) {
+    	    	numero = rs.getInt(1);
+    	    }
+    	    
+    	} catch (SQLException ex) {
+    		System.out.println(" [" + ex + "] - Error");
+    	}
+    	
+    	return numero;
+    }
     
     // Devuelve 
     // Los argumentos indican el tipo de ResultSet deseado
@@ -111,7 +154,7 @@ public class DBManager {
             ResultSet rs = stmt.executeQuery();
             return rs;
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            System.out.println("[" + ex + "] - Pruebe con otra tabla");
             return null;
         }
 
@@ -124,43 +167,6 @@ public class DBManager {
      */
     public static ResultSet getTablaClientes() {
         return getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    }
-    
-    /**
-     * Imprime en un fichero lista de clientes.
-     * @param ruta cadena de texto con la ruta del fichero a generar
-     * @return devuelve true si se recogieron los clientes en un fichero satisfactoriamente
-     */
-    public static boolean printClientesFichero(String ruta) {
-    	
-    	try {
-    		File fichero = new File(ruta);
-    		fichero.createNewFile();
-    		ResultSet rs = getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			
-			FileWriter writer = new FileWriter(fichero);
-    	
-			writer.write("DB Name: " + DB_NAME + "   -   Table Name: " + DB_CLI + "\n");
-			writer.write(DB_CLI_ID + "\t" + DB_CLI_NOM + "\t" + DB_CLI_DIR + "\n");
-    	
-			while (rs.next()) {
-                int id = rs.getInt(DB_CLI_ID);
-                String n = rs.getString(DB_CLI_NOM);
-                String d = rs.getString(DB_CLI_DIR);
-                writer.write(id + "\t" + n + "\t" + d + "\n");
-            }
-			
-			writer.close();
-			
-			return true;
-		} catch (IOException e) {
-			System.out.println("[" + e + "] - No se puedo crear el fichero");
-			return false;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}   
-            	   	
     }
 
     /**
@@ -179,6 +185,8 @@ public class DBManager {
             rs.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
+        } catch (NullPointerException ex) {
+        	System.out.println("[" + ex + "]");
         }
     }
 
@@ -210,7 +218,7 @@ public class DBManager {
             return rs;
 
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            System.out.println("[" + ex + "]");
             return null;
         }
     }
@@ -300,6 +308,9 @@ public class DBManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
             return false;
+        } catch (NullPointerException ex) {
+        	System.out.println("[" + ex + "]");
+        	return false;
         }
     }
 
@@ -375,6 +386,50 @@ public class DBManager {
             ex.printStackTrace();
             return false;
         }
+    }
+    
+    //////////////////////////////////////////////////
+    // FICHEROS
+    //////////////////////////////////////////////////
+    
+    /**
+     * Imprime en un fichero lista de clientes.
+     * @param ruta cadena de texto con la ruta del fichero a generar
+     * @return devuelve true si se recogieron los clientes en un fichero satisfactoriamente
+     */
+    public static boolean printClientesFichero(String ruta) {
+    	
+    	try {
+    		File fichero = new File(ruta);
+    		fichero.createNewFile();
+    		ResultSet rs = getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			
+			FileWriter writer = new FileWriter(fichero);
+    	
+			writer.write("DB Name: " + DB_NAME + "   -   Table Name: " + DB_CLI + "\n");
+			writer.write(DB_CLI_ID + "\t" + DB_CLI_NOM + "\t" + DB_CLI_DIR + "\n");
+    	
+			while (rs.next()) {
+                int id = rs.getInt(DB_CLI_ID);
+                String n = rs.getString(DB_CLI_NOM);
+                String d = rs.getString(DB_CLI_DIR);
+                writer.write(id + "\t" + n + "\t" + d + "\n");
+            }
+			
+			writer.close();
+			
+			return true;
+		} catch (IOException e) {
+			System.out.println("[" + e + "] - No se puedo crear el fichero");
+			return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		} catch (NullPointerException ex) {
+        	System.out.println("[" + ex + "]");
+        	return false;
+        }
+            	   	
     }
     
 }

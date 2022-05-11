@@ -1,4 +1,5 @@
 
+import java.sql.SQLException;
 import java.util.Scanner;
 import base_datos.DBManager;
 
@@ -6,7 +7,7 @@ import base_datos.DBManager;
  *
  * @author Antonio J. Gil
  * created on 10/05
- * @version 2.0
+ * @version 3.0
  */
 public class GestionClientes {
 
@@ -15,15 +16,27 @@ public class GestionClientes {
 	 * @param args Argumentos
 	 */
     public static void main(String[] args) {
-
-        DBManager.connect();
-
-        boolean salir = false;
+    	boolean baseCorrecta = false;
+    	
+    	do {
+    		pideBaseTabla();
+    		
+    		try {
+    			baseCorrecta = DBManager.connect();
+    		} catch (SQLException e) {
+    			System.out.println(" [" + e + "] - No se pudo conectar con la BBDD, intentelo de nuevo.\n");
+    		}
+    		
+    	}while(!baseCorrecta);
+    	
+    	System.out.println("OK!");	
+    		
+    	boolean salir = false;
         do {
-            salir = menuPrincipal();
+        	salir = menuPrincipal();
         } while (!salir);
-
-        DBManager.close();
+            
+        DBManager.close();	
 
     }
 
@@ -39,7 +52,8 @@ public class GestionClientes {
         System.out.println("3. Modificar cliente");
         System.out.println("4. Eliminar cliente");
         System.out.println("5. Imprimir tabla en un fichero");
-        System.out.println("6. Salir");
+        System.out.println("6. Solicitar número de clientes de una zona");
+        System.out.println("7. Salir");
         
             
         int opcion = pideInt("Elige una opción: ");
@@ -61,6 +75,9 @@ public class GestionClientes {
             	opcionImprimirFichero();
             	return false;
             case 6:
+            	opcionImprimirNumeroPersonas();
+            	return false;
+            case 7:
                 return true;
             default:
                 System.out.println("Opción elegida incorrecta");
@@ -83,6 +100,7 @@ public class GestionClientes {
                 int valor = in.nextInt();
                 return valor;
             } catch (Exception e) {
+            	in.nextLine();
                 System.out.println("No has introducido un número entero. Vuelve a intentarlo.");
             }
         }
@@ -105,6 +123,18 @@ public class GestionClientes {
                 System.out.println("No has introducido una cadena de texto. Vuelve a intentarlo.");
             }
         }
+    }
+    
+    /**
+     * Solicita nueva BBDD y tabla a las que se acceden
+     */
+    public static void pideBaseTabla(){
+    	
+    	String base = pideLinea("Introduce el nombre de la base de datos a la que acceder. Si lo dejas vacío, por defecto 'tienda' ");
+    	String tabla = pideLinea("Introduce el nombre de la tabla a la que acceder. Si lo dejas vacío, por defecto 'clientes' ");
+    	
+    	DBManager.cambioBaseyTabla(base, tabla);
+    	
     }
 
     /**
@@ -202,4 +232,15 @@ public class GestionClientes {
         	return;
         }
     }
+    
+    /**
+     * Solicita zona de donde se quiere saber el numero de personas
+     */
+    public static void opcionImprimirNumeroPersonas() {
+    	String lugar = pideLinea("Introduce el nombre del lugar de donde quieres saber cuantos clientes hay ");
+    	
+    	System.out.println("Número de clientes en " + lugar + ": " + DBManager.getCountDireccion(lugar) + "");
+    }
+    
+    
 }
