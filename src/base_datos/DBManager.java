@@ -35,9 +35,9 @@ public class DBManager {
     // Configuración de la tabla Clientes
     private static String DB_CLI = "clientes";
     private static String DB_CLI_SELECT = "SELECT * FROM " + DB_CLI;
-    private static final String DB_CLI_ID = "id";
-    private static final String DB_CLI_NOM = "nombre";
-    private static final String DB_CLI_DIR = "direccion";
+    private static String DB_TABLE_ID = "id";
+    private static String DB_TABLE_N2 = "nombre";
+    private static String DB_TABLE_N3 = "direccion";
 
     //////////////////////////////////////////////////
     // MÉTODOS DE CONEXIÓN A LA BASE DE DATOS
@@ -47,8 +47,11 @@ public class DBManager {
      * Cambia la base de datos y/o la tabla a la que se accede
      * @param base Nombre de la Base de datos
      * @param tabla Tabla de la Base de datos
+     * @param id Campo clave
+     * @param n2 Campo numero 2
+     * @param n3 Campo numero 3
      */
-    public static void cambioBaseyTabla(String base, String tabla) {
+    public static void cambioBaseyTabla(String base, String tabla, String id, String n2, String n3) {
     	
     	if(base.length()!=0) {
     		DB_NAME = base;
@@ -61,6 +64,12 @@ public class DBManager {
     	} else {
     		DB_CLI = "clientes";
     	}
+    	
+    	DB_TABLE_ID = id;
+    	
+    	DB_TABLE_N2 = n2;
+    	
+    	DB_TABLE_N3 = n3;
     	
     	DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?serverTimezone=UTC";
     	DB_CLI_SELECT = "SELECT * FROM " + DB_CLI;
@@ -168,9 +177,9 @@ public class DBManager {
         	
             ResultSet rs = getTablaClientes(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             while (rs.next()) {
-                int id = rs.getInt(DB_CLI_ID);
-                String n = rs.getString(DB_CLI_NOM);
-                String d = rs.getString(DB_CLI_DIR);
+                int id = rs.getInt(DB_TABLE_ID);
+                String n = rs.getString(DB_TABLE_N2);
+                String d = rs.getString(DB_TABLE_N3);
                 System.out.println(id + "\t" + n + "\t" + d);
             }
             rs.close();
@@ -193,7 +202,7 @@ public class DBManager {
     public static ResultSet getCliente(int id) {
         try {
             // Realizamos la consulta SQL
-            String sql = DB_CLI_SELECT + " WHERE " + DB_CLI_ID + "= ?;";
+            String sql = DB_CLI_SELECT + " WHERE " + DB_TABLE_ID + "= ?;";
             PreparedStatement stmt = conn.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             stmt.setString(1, id + "");
             //System.out.println(sql);
@@ -261,9 +270,9 @@ public class DBManager {
             }
             
             // Imprimimos su información por pantalla
-            int cid = rs.getInt(DB_CLI_ID);
-            String nombre = rs.getString(DB_CLI_NOM);
-            String direccion = rs.getString(DB_CLI_DIR);
+            int cid = rs.getInt(DB_TABLE_ID);
+            String nombre = rs.getString(DB_TABLE_N2);
+            String direccion = rs.getString(DB_TABLE_N3);
             System.out.println("Cliente " + cid + "\t" + nombre + "\t" + direccion);
 
         } catch (SQLException ex) {
@@ -287,8 +296,8 @@ public class DBManager {
 
             // Insertamos el nuevo registro
             rs.moveToInsertRow();
-            rs.updateString(DB_CLI_NOM, nombre);
-            rs.updateString(DB_CLI_DIR, direccion);
+            rs.updateString(DB_TABLE_N2, nombre);
+            rs.updateString(DB_TABLE_N3, direccion);
             rs.insertRow();
 
             // Todo bien, cerramos ResultSet y devolvemos true
@@ -327,8 +336,8 @@ public class DBManager {
 
             // Si tiene un primer registro, lo eliminamos
             if (rs.first()) {
-                rs.updateString(DB_CLI_NOM, nuevoNombre);
-                rs.updateString(DB_CLI_DIR, nuevaDireccion);
+                rs.updateString(DB_TABLE_N2, nuevoNombre);
+                rs.updateString(DB_TABLE_N3, nuevaDireccion);
                 rs.updateRow();
                 rs.close();
                 System.out.println("OK!");
@@ -398,12 +407,12 @@ public class DBManager {
 			FileWriter writer = new FileWriter(fichero);
     	
 			writer.write("DB Name: " + DB_NAME + "   -   Table Name: " + DB_CLI + "\n");
-			writer.write(DB_CLI_ID + "\t" + DB_CLI_NOM + "\t" + DB_CLI_DIR + "\n");
+			writer.write(DB_TABLE_ID + "\t" + DB_TABLE_N2 + "\t" + DB_TABLE_N3 + "\n");
     	
 			while (rs.next()) {
-                int id = rs.getInt(DB_CLI_ID);
-                String n = rs.getString(DB_CLI_NOM);
-                String d = rs.getString(DB_CLI_DIR);
+                int id = rs.getInt(DB_TABLE_ID);
+                String n = rs.getString(DB_TABLE_N2);
+                String d = rs.getString(DB_TABLE_N3);
                 writer.write(id + "\t" + n + "\t" + d + "\n");
             }
 			

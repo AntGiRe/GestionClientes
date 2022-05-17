@@ -126,14 +126,18 @@ public class GestionClientes {
     }
     
     /**
-     * Solicita nueva BBDD y tabla a las que se acceden
+     * Solicita nueva BBDD, tabla y campos a las que se acceden
      */
     public static void pideBaseTabla(){
     	
     	String base = pideLinea("Introduce el nombre de la base de datos a la que acceder. Si lo dejas vacío, por defecto 'tienda' ");
     	String tabla = pideLinea("Introduce el nombre de la tabla a la que acceder. Si lo dejas vacío, por defecto 'clientes' ");
     	
-    	DBManager.cambioBaseyTabla(base, tabla);
+    	String id = pideLinea("Introduce el nombre de la columna primary key (int): ");
+    	String n2 = pideLinea("Introduce el nombre de la columna segunda (String): ");
+    	String n3 = pideLinea("Introduce el nombre de la columna tercera (String): ");
+    	
+    	DBManager.cambioBaseyTabla(base, tabla, id, n2, n3);
     	
     }
 
