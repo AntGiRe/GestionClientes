@@ -1,4 +1,5 @@
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -8,7 +9,7 @@ import base_datos.DBManager;
  *
  * @author Antonio J. Gil
  * created on 10/05
- * @version 3.0
+ * @version 6.0
  */
 public class GestionClientes {
 
@@ -30,15 +31,75 @@ public class GestionClientes {
     		
     	}while(!baseCorrecta);
     	
-    	System.out.println("OK!");	
+    	System.out.println("OK!");
     	
-    	eligeTabla();
-    		
     	boolean salir = false;
-        do {
-        	salir = menuPrincipal();
-        } while (!salir);
-            
+    	
+    	do {
+    		System.out.println(" ¿Que quiere hacer?");
+    		System.out.println(" 0. Salir.");	//DONE
+    		System.out.println(" 1. Abrir una tabla y realizar acciones con ella");	//DONE
+    		System.out.println(" 2. Crear una nueva tabla en la BD");	//TODO
+    		System.out.println(" 3. Abrir un documento de texto y realizar una acción");	//TODO
+    		System.out.println(" 4. Procedimientos Almacenados");	//DONE
+    		System.out.println(" 5. Cambiar la BBDD");	//DONE
+    		int opcion = pideInt("Elige una opción: ");
+    		
+    		switch (opcion) {
+    		case 0:
+    			salir = true;
+    			break;
+    		case 1:
+    			eligeTabla();
+    			do {
+    	        	salir = menuTabla();
+    	        } while (!salir);
+    			salir = false;
+    			break;
+    		case 2:
+    			break;
+    		case 3:
+    			do {
+    				System.out.println("0. Salir");
+    				System.out.println("1. Insertar a partir de fichero.");	//TODO
+    				System.out.println("1. Modificar a partir de fichero.");	//TODO
+    				System.out.println("3. Borrar a partir de fichero.");	//DONE
+    				int opcionFich = pideInt("Elige una opcioón: ");
+    				
+    				switch (opcionFich) {
+    				case 0:
+    					salir = true;
+    					break;
+    				case 1:
+    					break;
+    				case 2:
+    					break;
+    				case 3:
+    					DBManager.eliminarFichero(pideLinea("Introduce ruta de archivo: "));
+    					break;
+    				}
+    			}while(!salir);
+    			salir = false;
+    			
+    			break;
+    		case 4:
+    			opcionProcAlmacenados();
+    			break;
+    		case 5:
+    			pideBase();
+            	try {
+            		DBManager.connect();
+            		System.out.println("OK!");
+            	} catch (SQLException e) {
+            		System.out.println("No se pudo conectar a la BBDD");
+            	}
+    			break;
+    		default:
+    			System.out.println("Ha introducido un valor erróneo");
+    			break;
+    		}
+    	} while (!salir);
+    	
         DBManager.close();	
 
     }
@@ -47,16 +108,16 @@ public class GestionClientes {
      * Imprime menú y solicita elegir opción
      * @return devuelve false cuando el usuario sale del menú principal
      */
-    public static boolean menuPrincipal() {
+    public static boolean menuTabla() {
         System.out.println("");
         System.out.println("MENU PRINCIPAL");
-        System.out.println("0. Salir");	//DONE
-        System.out.println("1. Listar filas");	//DONE
-        System.out.println("2. Nueva fila");	//DONE
-        System.out.println("3. Modificar fila"); //DONE
-        System.out.println("4. Eliminar fila");	//DONE
-        System.out.println("5. Imprimir tabla en un fichero");	//DONE
-        System.out.println("6. Cambiar la BBDD");	//DONE
+        System.out.println("0. Salir");
+        System.out.println("1. Listar filas");
+        System.out.println("2. Nueva fila");
+        System.out.println("3. Modificar fila");
+        System.out.println("4. Eliminar fila");
+        System.out.println("5. Imprimir tabla en un fichero");
+        System.out.println("6. Filtrar tabla");	//TODO
         
         int opcion = pideInt("Elige una opción: ");
         
@@ -77,16 +138,6 @@ public class GestionClientes {
                 return false;
             case 5:
             	opcionImprimirFichero();
-            	return false;
-            case 6:
-            	pideBase();
-            	eligeTabla();
-            	try {
-            		DBManager.connect();
-            		System.out.println("OK!");
-            	} catch (SQLException e) {
-            		System.out.println("No se pudo conectar a la BBDD");
-            	}
             	return false;
             default:
                 System.out.println("Opción elegida incorrecta");
@@ -233,7 +284,7 @@ public class GestionClientes {
         }
 
         // Eliminamos el cliente
-        boolean res = DBManager.deleteCliente(id);
+        boolean res = DBManager.deleteFila(id);
 
         if (res) {
             System.out.println("Fila eliminada correctamente");
@@ -259,5 +310,22 @@ public class GestionClientes {
         }
     }
     
+    /**
+     * Permite utilizar procedimientos almacenados de la BBDD
+     */
+    public static void opcionProcAlmacenados() {
+    	DBManager.getProc();
+    	String nombreProc = pideLinea("Introduce uno de los procedimientos almacenados de arriba: ");
+    	ArrayList<String> lista = DBManager.infoColumna(nombreProc);
+    	ArrayList<String> resultado = new ArrayList<String>();
+    	
+    	for(int i = 0; i < lista.size(); i++) {
+    		System.out.print("Introduce el siguiente campo: " + lista.get(i));
+    		System.out.println();
+    		resultado.add(pideLinea("Introduce: "));
+    	}
+    	
+    	DBManager.procedimientoAlmac(nombreProc, resultado);
+    }
     
 }

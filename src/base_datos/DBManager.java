@@ -3,12 +3,15 @@ package base_datos;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
@@ -16,7 +19,7 @@ import java.sql.ResultSetMetaData;
  *
  * @author Antonio J. Gil
  * created on 10/0
- * @version 3.0
+ * @version 6.0
  */
 public class DBManager {
 
@@ -33,8 +36,6 @@ public class DBManager {
 
     // Configuración de la tabla Clientes
     private static String DB_TABLE = "clientes";
-    private static String DB_TABLE_N2 = "nombre";
-    private static String DB_TABLE_N3 = "direccion";
 
     //////////////////////////////////////////////////
     // MÉTODOS DE CONEXIÓN A LA BASE DE DATOS
@@ -90,6 +91,118 @@ public class DBManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    //////////////////////////////////////////////////
+    // MÉTODOS DE PROCEDIMIENTOS ALMACENADOS
+    //////////////////////////////////////////////////
+    
+    /**
+     * Pide a la BD el nombre de todos los procedimientos almacenados
+     */
+    public static void getProc(){
+    	DatabaseMetaData metaDatos;
+    	
+    	try {
+			metaDatos = conn.getMetaData();
+			ResultSet rs = metaDatos.getProcedures(DB_NAME, null, null);
+			ResultSetMetaData rsmd = rs.getMetaData();
+			
+			System.out.println("Procedimientos Almacenados:");
+			
+			while(rs.next()) {
+				for(int i = 0; i < rsmd.getColumnCount()/8; i++){
+					System.out.println(rs.getString(3+(i*8)));
+				}
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+    }
+    
+    /**
+     * Solicita el numero de columnas de un procedimiento
+     * @param nombre nombre del procedimiento
+     * @return devuelve el numero de columnas de un procedimiento
+     */
+    public static int numeroColumnas(String nombre) {
+    	ArrayList<String> lista = new ArrayList<String>();
+    	DatabaseMetaData metaDatos;
+		try {
+			metaDatos = conn.getMetaData();
+			ResultSet rs = metaDatos.getProcedureColumns(DB_NAME, null, nombre, null);
+			
+			while(rs.next()) {
+				lista.add(rs.getString("COLUMN_NAME"));
+			}
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return lista.size();
+    }
+    
+    /**
+     * Solicita a la BD un procedimiento almacenado
+     * @param nombre nombre del procedimiento
+     * @param lista cadenas de texto necesarias para realizar el procedimiento
+     */
+    public static void procedimientoAlmac(String nombre, ArrayList<String> lista) {
+    	String sql = "{call " + nombre + "(";
+    	
+    	
+    	for(int i = 0; i < numeroColumnas(nombre); i++) {
+    		sql = sql + "?";
+    		if(i!=numeroColumnas(nombre)-1) {
+    			sql = sql + ",";
+    		}
+    	}
+    	
+    	sql = sql + ")}";
+    	
+    	try {
+    		CallableStatement cStmt = conn.prepareCall(sql);
+    		for(int i = 0; i < lista.size(); i++) {
+    			cStmt.setString((i+1), lista.get(i));
+    		}
+    		
+    		cStmt.execute();    
+    	    final ResultSet rs = cStmt.getResultSet();
+			
+    	    while (rs.next()) {  
+    	          System.out.println(rs.getString(1));
+    	    } 
+    	    
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+    }
+    
+    /**
+     * Pide a la BD el nombre de las columnas de los procedimientos almacenados
+     * @param nombre del procedimiento almacenado
+     * @return devuelve un arraylist con los nombres de las columnas
+     */
+    public static ArrayList<String> infoColumna(String nombre) {
+    	ArrayList<String> lista = new ArrayList<String>();
+    	DatabaseMetaData metaDatos;
+		try {
+			metaDatos = conn.getMetaData();
+			ResultSet rs = metaDatos.getProcedureColumns(DB_NAME, null, nombre, null);
+			
+			while(rs.next()) {
+				lista.add(rs.getString("COLUMN_NAME"));
+			}
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return lista;
     }
 
     //////////////////////////////////////////////////
@@ -412,14 +525,14 @@ public class DBManager {
     }
 
     /**
-     * Solicita a la BD eliminar un cliente
+     * Solicita a la BD eliminar una fila
      *
-     * @param id id del cliente a eliminar
+     * @param id id de la fila a eliminar
      * @return verdadero si pudo eliminarlo, false en caso contrario
      */
-    public static boolean deleteCliente(int id) {
+    public static boolean deleteFila(int id) {
         try {
-            System.out.print("Eliminando cliente " + id + "... ");
+            System.out.print("Eliminando fila " + id + "... ");
 
             // Obtenemos el cliente
             ResultSet rs = getCliente(id);
@@ -503,6 +616,35 @@ public class DBManager {
         	return false;
         }
             	   	
+    }
+    
+    /**
+     * Elimina fila/s de una BD a través de un fichero
+     * @param ruta la ruta del fichero
+     */
+    public static void eliminarFichero(String ruta) {
+    	File archivo = new File(ruta);
+    	String pk = "";
+    	try {
+			Scanner input = new Scanner(archivo);
+			
+			DB_NAME = input.nextLine();
+			DB_TABLE = input.nextLine();
+			pk = input.nextLine();
+			
+			while(pk.length()!=0) {
+				deleteFila(Integer.parseInt(pk.substring(0, pk.indexOf(","))));
+				pk = pk.substring(pk.indexOf(",")+1);
+			}
+			
+			input.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (StringIndexOutOfBoundsException e) {
+			deleteFila(Integer.parseInt(pk.substring(0)));
+		}
+    	
+    	
     }
     
 }
