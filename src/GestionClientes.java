@@ -1,5 +1,4 @@
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -9,7 +8,7 @@ import base_datos.DBManager;
  *
  * @author Antonio J. Gil
  * created on 10/05
- * @version 6.0
+ * @version 7.0
  */
 public class GestionClientes {
 
@@ -39,7 +38,7 @@ public class GestionClientes {
     		System.out.println(" ¿Que quiere hacer?");
     		System.out.println(" 0. Salir.");	//DONE
     		System.out.println(" 1. Abrir una tabla y realizar acciones con ella");	//DONE
-    		System.out.println(" 2. Crear una nueva tabla en la BD");	//TODO
+    		System.out.println(" 2. Crear una nueva tabla en la BD");	//DONE
     		System.out.println(" 3. Abrir un documento de texto y realizar una acción");	//TODO
     		System.out.println(" 4. Procedimientos Almacenados");	//DONE
     		System.out.println(" 5. Cambiar la BBDD");	//DONE
@@ -57,6 +56,7 @@ public class GestionClientes {
     			salir = false;
     			break;
     		case 2:
+    			opcionNuevaTabla();
     			break;
     		case 3:
     			do {
@@ -326,6 +326,30 @@ public class GestionClientes {
     	}
     	
     	DBManager.procedimientoAlmac(nombreProc, resultado);
+    }
+    
+    /**
+     * Pide la información necesaria para crear una tabla nueva
+     */
+    public static void opcionNuevaTabla() {
+    	String nombre = pideLinea("Intrdouce el nombre de la tabla: ");
+    	ArrayList<String> lista = new ArrayList<String>();
+    	
+    	lista.add(pideLinea("Introduce nombre de la primary key: "));
+    	lista.add(pideLinea("Introduce tipo de dato de la primary key -> String o Int: "));
+    	lista.add(pideLinea("Alguna etiqueta mas que añadir como auto_increment: ") + " primary key");
+    	String campo;
+    	do {
+    		campo = pideLinea("Introduce nuevo campo, introduzca 0 para concluir el añadido de campos: ");
+    		if(!campo.equals("0")) {
+    			lista.add(campo);
+    			lista.add(pideLinea("Introduce tipo de dato de " + campo + ": "));
+    			lista.add(pideLinea("Alguna etiqueta mas que añadir como not null: "));
+    		}
+    		
+    	} while(!campo.equals("0"));
+    	
+    	DBManager.crearTabla(nombre, lista);
     }
     
 }

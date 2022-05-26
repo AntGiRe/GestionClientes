@@ -19,14 +19,14 @@ import java.sql.ResultSetMetaData;
  *
  * @author Antonio J. Gil
  * created on 10/0
- * @version 6.0
+ * @version 7.0
  */
 public class DBManager {
 
-	// Conexiï¿½n a la base de datos
+	// Conexión a la base de datos
     private static Connection conn = null;
 
-    // Configuraciï¿½n de la conexiï¿½n a la base de datos
+    // Configuración de la conexión a la base de datos
     private static final String DB_HOST = "localhost";
     private static final String DB_PORT = "3306";
     private static String DB_NAME = "tienda";
@@ -34,11 +34,11 @@ public class DBManager {
     private static final String DB_USER = "root";
     private static final String DB_PASS = "";
 
-    // Configuraciï¿½n de la tabla Clientes
+    // Configuración de la tabla Clientes
     private static String DB_TABLE = "clientes";
 
     //////////////////////////////////////////////////
-    // Mï¿½TODOS DE CONEXIï¿½N A LA BASE DE DATOS
+    // MÉTODOS DE CONEXIÓN A LA BASE DE DATOS
     //////////////////////////////////////////////////
     
     /**
@@ -54,7 +54,7 @@ public class DBManager {
     /**
      * Intenta conectar con la base de datos.
      * @return true si pudo conectarse, false en caso contrario
-     * @throws SQLException Lanza excepciï¿½n si base de datos no existe.
+     * @throws SQLException Lanza excepción si base de datos no existe.
      */
     public static boolean connect() throws SQLException{
             System.out.print("Conectando a la base de datos...");
@@ -63,11 +63,11 @@ public class DBManager {
     }
 
     /**
-     * Cierra la conexiï¿½n con la base de datos.
+     * Cierra la conexión con la base de datos.
      */
     public static void close() {
         try {
-            System.out.print("Cerrando la conexiï¿½n...");
+            System.out.print("Cerrando la conexión...");
             conn.close();
             System.out.println("OK!");
         } catch (SQLException ex) {
@@ -94,8 +94,46 @@ public class DBManager {
     }
     
     //////////////////////////////////////////////////
-    // Mï¿½TODOS DE PROCEDIMIENTOS ALMACENADOS
+    // MÉTODOS DE PROCEDIMIENTOS ALMACENADOS
     //////////////////////////////////////////////////
+    
+    /**
+     * Crea una tabla nueva en la BD
+     * @param nombre nombre de la nueva tabla
+     * @param lista lista con toda la información necesaria
+     */
+    public static void crearTabla(String nombre, ArrayList<String> lista) {
+    	String sql = "create table " + nombre + " (\n";
+    	PreparedStatement stmt = null;
+    	
+    	for(int i = 0; i < lista.size(); i++) {
+    		
+    		if(lista.get(i).equalsIgnoreCase("String")) {
+    			sql += " varchar(50)";
+    		} else if(lista.get(i).equalsIgnoreCase("Int")) {
+    			sql += " int";
+    		} else {
+    			sql += " " + lista.get(i);
+    		}
+			  
+			  if((i+1)%3==0 && i!=(lista.size()-1)) {
+				  sql += ",\n";
+			  }
+			  
+		  }
+    	
+    	sql += "\n);";
+    	
+    	System.out.println(sql);
+    	try {
+    		  stmt = conn.prepareStatement(sql);
+    		  
+    		  stmt.execute(); 
+    		  stmt.close();	           
+    	} catch (SQLException sqle) { 
+    		  System.out.println(sqle);
+    	}
+    }
     
     /**
      * Pide a la BD el nombre de todos los procedimientos almacenados
@@ -206,7 +244,7 @@ public class DBManager {
     }
 
     //////////////////////////////////////////////////
-    // Mï¿½TODOS DE TABLA CLIENTES
+    // MÉTODOS DE TABLA CLIENTES
     //////////////////////////////////////////////////
     
     /**
@@ -254,7 +292,7 @@ public class DBManager {
     }
     
     /**
-     * Pide el nombre de la columna a partir de su posiciï¿½n
+     * Pide el nombre de la columna a partir de su posición
      * @param numColumna posicion de la columna
      * @return devuelve una cadena de texto con el nombre de la columna
      */
@@ -310,7 +348,7 @@ public class DBManager {
     }
 
     //////////////////////////////////////////////////
-    // Mï¿½TODOS DE UN SOLO CLIENTE
+    // MÉTODOS DE UN SOLO CLIENTE
     //////////////////////////////////////////////////
     
     /**
@@ -409,7 +447,7 @@ public class DBManager {
             
             imprimeColumnas();
             
-            // Imprimimos su informaciï¿½n por pantalla
+            // Imprimimos su información por pantalla
             for(int i = 1; i <= rsmd.getColumnCount(); i++) {
         		if(rsmd.getColumnTypeName(i).equals("VARCHAR")) {
             		String texto = rs.getString(rsmd.getColumnName(i));
@@ -515,7 +553,7 @@ public class DBManager {
                 System.out.println("OK!");
                 return true;
             } else {
-                System.out.println("ERROR. ResultSet vacï¿½o.");
+                System.out.println("ERROR. ResultSet vacío.");
                 return false;
             }
         } catch (SQLException ex) {
@@ -550,7 +588,7 @@ public class DBManager {
                 System.out.println("OK!");
                 return true;
             } else {
-                System.out.println("ERROR. ResultSet vacï¿½o.");
+                System.out.println("ERROR. ResultSet vacío.");
                 return false;
             }
 
@@ -619,7 +657,7 @@ public class DBManager {
     }
     
     /**
-     * Elimina fila/s de una BD a travï¿½s de un fichero
+     * Elimina fila/s de una BD a través de un fichero
      * @param ruta la ruta del fichero
      */
     public static void eliminarFichero(String ruta) {
