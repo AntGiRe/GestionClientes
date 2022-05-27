@@ -8,7 +8,7 @@ import base_datos.DBManager;
  *
  * @author Antonio J. Gil
  * created on 10/05
- * @version 7.0
+ * @version 8.0
  */
 public class GestionClientes {
 
@@ -62,7 +62,7 @@ public class GestionClientes {
     			do {
     				System.out.println("0. Salir");
     				System.out.println("1. Insertar a partir de fichero.");	//TODO
-    				System.out.println("1. Modificar a partir de fichero.");	//TODO
+    				System.out.println("2. Modificar a partir de fichero.");	//TODO
     				System.out.println("3. Borrar a partir de fichero.");	//DONE
     				int opcionFich = pideInt("Elige una opcioón: ");
     				
@@ -117,7 +117,7 @@ public class GestionClientes {
         System.out.println("3. Modificar fila");
         System.out.println("4. Eliminar fila");
         System.out.println("5. Imprimir tabla en un fichero");
-        System.out.println("6. Filtrar tabla");	//TODO
+        System.out.println("6. Filtrar tabla");
         
         int opcion = pideInt("Elige una opción: ");
         
@@ -138,6 +138,9 @@ public class GestionClientes {
                 return false;
             case 5:
             	opcionImprimirFichero();
+            	return false;
+            case 6:
+            	opcionFiltrarTabla();
             	return false;
             default:
                 System.out.println("Opción elegida incorrecta");
@@ -326,6 +329,18 @@ public class GestionClientes {
     	}
     	
     	DBManager.procedimientoAlmac(nombreProc, resultado);
+    }
+    
+    /**
+     * Pide los datos necesarios para filtrar la tabla
+     */
+    public static void opcionFiltrarTabla() {
+    	DBManager.infoColumnaTabla();
+    	System.out.println();
+    	String columna = pideLinea("Introduce el campo por el cual quieres filtrar: ");
+    	String texto = pideLinea("Introduce el texto por el cual se filtrará: ");
+    	
+    	DBManager.getColumnasFiltradas(columna, texto);
     }
     
     /**

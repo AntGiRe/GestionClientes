@@ -19,7 +19,7 @@ import java.sql.ResultSetMetaData;
  *
  * @author Antonio J. Gil
  * created on 10/0
- * @version 7.0
+ * @version 8.0
  */
 public class DBManager {
 
@@ -244,8 +244,61 @@ public class DBManager {
     }
 
     //////////////////////////////////////////////////
-    // MÉTODOS DE TABLA CLIENTES
+    // MÉTODOS DE TABLA 
     //////////////////////////////////////////////////
+    
+    /**
+     * Muestra nombre de cada columna de una tabla
+     */
+    public static void infoColumnaTabla() {
+    	try {
+    		ResultSet rs = getTabla(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            
+            for(int i = 0; i < rsmd.getColumnCount(); i++) {
+            	System.out.print(rsmd.getColumnName(i+1) + "  ");
+            }
+    	} catch (SQLException e) {
+    		System.out.println(e);
+    	}
+		
+    }
+    
+    /**
+     * Busca las filas que cumplan la condición propuesta
+     * @param columna nombre de la columna
+     * @param texto texto el cual se busca
+     */
+    public static void getColumnasFiltradas(String columna, String texto) {
+    	try {
+        	
+            String sql = "SELECT * FROM " + DB_TABLE + " WHERE " + columna + "= ?;";
+            PreparedStatement stmt = conn.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            stmt.setString(1, texto);
+            ResultSet rs = stmt.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            
+            while (rs.next()) {
+            	
+            	for(int i = 1; i <= rsmd.getColumnCount(); i++) {
+            		if(rsmd.getColumnTypeName(i).equals("VARCHAR")) {
+                		String cadena = rs.getString(rsmd.getColumnName(i));
+                		System.out.print(cadena + "\t");
+                	}
+                	
+                	if(rsmd.getColumnTypeName(i).equals("INT")) {
+                		int entero = rs.getInt(rsmd.getColumnName(i));
+                		System.out.print(entero + "\t");
+                	}
+                }
+                System.out.println();
+            }
+            rs.close();
+
+        } catch (SQLException ex) {
+            System.out.println("[" + ex + "]");
+        }
+    }
     
     /**
      * Se introduce una nueva tabla
