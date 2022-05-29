@@ -1,3 +1,0 @@
-tienda
-clientes
-1,2,3
