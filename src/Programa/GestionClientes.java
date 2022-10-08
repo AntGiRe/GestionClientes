@@ -1,14 +1,19 @@
+package Programa;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import base_datos.DBManager;
+import gestion.Cliente;
+import gestion.Fichero;
+import gestion.ProcAlmacenado;
+import gestion.Tabla;
 
 /**
  *
  * @author Antonio J. Gil
  * created on 10/05
- * @version 8.0
+ * @version 9.0
  */
 public class GestionClientes {
 
@@ -61,8 +66,8 @@ public class GestionClientes {
     		case 3:
     			do {
     				System.out.println("0. Salir");
-    				System.out.println("1. Insertar a partir de fichero.");	//TODO
-    				System.out.println("2. Modificar a partir de fichero.");	//TODO
+    				System.out.println("1. Insertar a partir de fichero.");	//DONE
+    				System.out.println("2. Modificar a partir de fichero.");	//DONE
     				System.out.println("3. Borrar a partir de fichero.");	//DONE
     				int opcionFich = pideInt("Elige una opcioón: ");
     				
@@ -71,11 +76,13 @@ public class GestionClientes {
     					salir = true;
     					break;
     				case 1:
+    					Fichero.addFilaFichero(pideLinea("Introduce ruta de archivo: "));
     					break;
     				case 2:
+    					Fichero.modFilaFichero(pideLinea("Introduce ruta de archivo: "));
     					break;
     				case 3:
-    					DBManager.eliminarFichero(pideLinea("Introduce ruta de archivo: "));
+    					Fichero.eliminarFichero(pideLinea("Introduce ruta de archivo: "));
     					break;
     				}
     			}while(!salir);
@@ -195,7 +202,7 @@ public class GestionClientes {
     	
     	String base = pideLinea("Introduce el nombre de la base de datos a la que acceder: ");
     	
-    	DBManager.cambioBaseNueva(base);
+    	DBManager.cambioBD(base);
     	
     }
     
@@ -205,8 +212,8 @@ public class GestionClientes {
     public static void eligeTabla(){
     	
     	System.out.println(" ** TABLAS **");
-    	DBManager.listarTablas();
-    	DBManager.setTabla(pideLinea("Elige una tabla: "));
+    	Tabla.listarTablas();
+    	Tabla.setTabla(pideLinea("Elige una tabla: "));
     	
     }
     
@@ -217,7 +224,7 @@ public class GestionClientes {
      */
     public static void opcionMostrarClientes() {
         System.out.println("Listado de tabla:");
-        DBManager.printTablaClientes();
+        Tabla.printTablaClientes();
     }
     
     /**
@@ -226,16 +233,16 @@ public class GestionClientes {
     public static void opcionNuevoCliente() {
     	ArrayList<String> lista = new ArrayList<String>();
     	
-    	for(int i = 1; i <= DBManager.numeroColumnas(); i++) {
-    		if(DBManager.nombreColumna(i).equals(DBManager.getPK())) {
+    	for(int i = 1; i <= Tabla.numeroColumnas(); i++) {
+    		if(Tabla.nombreColumna(i).equals(Cliente.getPK())) {
     			lista.add(null);
     		} else {
-    			lista.add(pideLinea("Introduce el " + DBManager.nombreColumna(i) + ": "));
+    			lista.add(pideLinea("Introduce el " + Tabla.nombreColumna(i) + ": "));
     		}
     		
     	}
 
-        boolean res = DBManager.insertCliente(lista);
+        boolean res = Cliente.insertCliente(lista);
 
         if (res) {
             System.out.println("Fila registrada correctamente");
@@ -252,19 +259,19 @@ public class GestionClientes {
         int id = pideInt("Indica el id de la fila a modificar: ");
 
         // Comprobamos si existe el cliente
-        if (!DBManager.existsCliente(id)) {
+        if (!Cliente.existsCliente(id)) {
             System.out.println("El cliente " + id + " no existe.");
             return;
         }
 
         // Mostramos datos del cliente a modificar
-        DBManager.printCliente(id);
+        Cliente.printCliente(id);
 
         // Solicitamos los nuevos datos
         String aModificar = pideLinea("Que campo quieres modificar: ");
         String nuevo = pideLinea("Nueva entrada de " + aModificar + ": ");
 
-        boolean res = DBManager.updateCliente(id,aModificar, nuevo);
+        boolean res = Cliente.updateCliente(id,aModificar, nuevo);
 
         if (res) {
             System.out.println("Fila modificada correctamente");
@@ -281,13 +288,13 @@ public class GestionClientes {
         int id = pideInt("Indica el id de la fila a eliminar: ");
 
         // Comprobamos si existe el cliente
-        if (!DBManager.existsCliente(id)) {
+        if (!Cliente.existsCliente(id)) {
             System.out.println("La fila " + id + " no existe.");
             return;
         }
 
         // Eliminamos el cliente
-        boolean res = DBManager.deleteFila(id);
+        boolean res = Cliente.deleteFila(id);
 
         if (res) {
             System.out.println("Fila eliminada correctamente");
@@ -304,7 +311,7 @@ public class GestionClientes {
         String ruta = pideLinea("Indica la ruta o nombre (si quiere que se genere en la carpeta de proyecto) del fichero: ");
 
         // Comprobamos si existe el cliente
-        if (DBManager.printClientesFichero(ruta)) {
+        if (Fichero.printClientesFichero(ruta)) {
             System.out.println("El fichero se ha generado correctamente");
             return;
         } else {
@@ -317,9 +324,9 @@ public class GestionClientes {
      * Permite utilizar procedimientos almacenados de la BBDD
      */
     public static void opcionProcAlmacenados() {
-    	DBManager.getProc();
+    	ProcAlmacenado.getProc();
     	String nombreProc = pideLinea("Introduce uno de los procedimientos almacenados de arriba: ");
-    	ArrayList<String> lista = DBManager.infoColumna(nombreProc);
+    	ArrayList<String> lista = ProcAlmacenado.infoColumna(nombreProc);
     	ArrayList<String> resultado = new ArrayList<String>();
     	
     	for(int i = 0; i < lista.size(); i++) {
@@ -328,19 +335,19 @@ public class GestionClientes {
     		resultado.add(pideLinea("Introduce: "));
     	}
     	
-    	DBManager.procedimientoAlmac(nombreProc, resultado);
+    	ProcAlmacenado.procedimientoAlmac(nombreProc, resultado);
     }
     
     /**
      * Pide los datos necesarios para filtrar la tabla
      */
     public static void opcionFiltrarTabla() {
-    	DBManager.infoColumnaTabla();
+    	Tabla.infoColumnaTabla();
     	System.out.println();
     	String columna = pideLinea("Introduce el campo por el cual quieres filtrar: ");
     	String texto = pideLinea("Introduce el texto por el cual se filtrará: ");
     	
-    	DBManager.getColumnasFiltradas(columna, texto);
+    	Tabla.getColumnasFiltradas(columna, texto);
     }
     
     /**
@@ -364,7 +371,7 @@ public class GestionClientes {
     		
     	} while(!campo.equals("0"));
     	
-    	DBManager.crearTabla(nombre, lista);
+    	ProcAlmacenado.crearTabla(nombre, lista);
     }
     
 }

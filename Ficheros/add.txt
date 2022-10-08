@@ -1,0 +1,5 @@
+tienda
+clientes
+id,nombre,direccion
+100,aa,bb
+101,cc,dd
